@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Личный кабинет сотрудника</title>
+</head>
+<body>
+    <style>
+        body {
+            margin: 0;
+        }
+        .container-acc {
+            color: white;
+            width: 100%;
+            height: 100vh;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(115deg, #56d8e4 10%, #9f01ea 90%);
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+        }
+
+        .table-info {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 60%;
+            border-collapse: collapse;
+            background-color: black;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 3px solid white;
+            background-color: black;
+        }
+
+        th {
+            background-color: grey;
+            color: white;
+        }
+
+        button {
+            display: block;
+            width: 200px;
+            text-align: center;
+            background: linear-gradient(115deg, #56d8e4 10%, #9f01ea 90%);
+            color: white;
+            border: 3px solid white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: white;
+            color: black;
+        }
+    </style>
+    <div class="container-acc">
+        <h1>Личный кабинет сотрудника</h1>
+        <div class = "table-info" id="form-data">
+            <!-- Здесь будут отображаться данные -->
+        </div>
+</div> 
+<script>
+    // Функция для обновления данных на странице
+    function updateFormData() {
+        fetch('/get_form_data')
+            .then(response => response.json())
+            .then(data => {
+                // Очищаем текущие данные
+                document.getElementById('form-data').innerHTML = '';
+
+                // Создаем таблицу для отображения данных
+                const table = document.createElement('table');
+
+                // Добавляем заголовки таблицы
+                const headers = ['ФИО', 'Email', 'Телефон', 'JSON'];
+                const headerRow = table.insertRow();
+                headers.forEach(header => {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    headerRow.appendChild(th);
+                });
+
+                // Добавляем строки с данными
+                data.forEach(item => {
+                    const row = table.insertRow();
+                    const fullNameCell = row.insertCell();
+                    fullNameCell.textContent = item.full_name;
+                    const emailCell = row.insertCell();
+                    emailCell.textContent = item.email;
+                    const phoneCell = row.insertCell();
+                    phoneCell.textContent = item.phone;
+                    const jsonCell = row.insertCell();
+                    const downloadButton = document.createElement('button');
+                    downloadButton.textContent = 'Скачать JSON';
+                    downloadButton.addEventListener('click', () => downloadJson(item));
+                    jsonCell.appendChild(downloadButton);
+                });
+
+                // Отображаем таблицу
+                document.getElementById('form-data').appendChild(table);
+            })
+            .catch(error => {
+                console.error('Ошибка при получении данных:', error);
+            });
+    }
+
+    // Функция для скачивания JSON
+    function downloadJson(data) {
+        const json = JSON.stringify(data);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'data.json';
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Обновляем данные при загрузке страницы
+    updateFormData();
+</script>
+</body>
+</html>

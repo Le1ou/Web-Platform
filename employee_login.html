@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация сотрудника</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container-login">
+        <h2 class="form-title">Авторизация сотрудника</h2>
+        <form id="loginForm" action="/login.php" method="post" onsubmit="return validateForm()">
+            <div class="form-element">
+                <label for="username" class="required-label">Логин:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-element">
+                <label for="password" class="required-label">Пароль:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <input type="submit" value="Войти" class="submit-button">
+        </form>
+        <div id="errorMessage" class="error">
+            Неправильный логин или пароль. Пожалуйста, попробуйте еще раз.
+        </div>
+        <script>
+            function validateForm() {
+                var username = document.getElementById('username').value;
+                var password = document.getElementById('password').value;
+                
+                // Проверка правильности логина и пароля (здесь может быть ваша логика)
+                if (username === '1' && password === '1') {
+                    window.location.href = '/employee_acc.html'; // Перенаправление на страницу сотрудника
+                    return false; // Остановка отправки формы
+                } else {
+                    document.getElementById('errorMessage').style.display = 'block'; // Показать сообщение об ошибке
+                    return false; // Остановка отправки формы
+                }
+            }
+        </script>
+    </div>
+</body>
