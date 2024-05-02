@@ -6,8 +6,6 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Личный кабинет сотрудника</title>
-</head>
-<body>
     <style>
         body {
             margin: 0;
@@ -18,7 +16,6 @@
             color: white;
             width: 100%;
             height: 100vh;
-            margin: 0 auto;
             padding: 20px;
             font-family: Arial, sans-serif;
         }
@@ -80,91 +77,116 @@
             margin-left: 30px;
         }
     </style>
+</head>
+<body>
     <h1>Личный кабинет сотрудника</h1>
     <div class="container-acc">
         <div class = "table-info" id="form-data">
             <!-- Здесь будут отображаться данные -->
         </div>
-<div class="filter-form">
-    <form id="filterForm">
-        <input type="text" id="filterInput" placeholder="Фильтр по ФИО">
-        <button type="submit">Поиск по ФИО</button>
-        <button type="button" id="resetButton">Сброс</button>
-    </form>
-</div>
+        <div class="filter-form">
+            <form id="filterForm">
+                <input type="text" id="filterInput" placeholder="Фильтр по ФИО">
+                <button type="button" id="sortAscButton">По возрастанию</button>
+                <button type="button" id="sortDescButton">По убыванию</button>
+                <button type="submit">Поиск</button>
+                <button type="button" id="resetButton">Сброс</button>
+            </form>
+        </div>
 </div> 
 <script>
-let originalData = []; // Переменная для хранения исходных данных
+    let originalData = []; // Переменная для хранения исходных данных
 
-// Функция для скачивания JSON
-function downloadJson(data) {
-    const json = JSON.stringify(data);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'data.json';
-    link.click();
-    URL.revokeObjectURL(url);
-}
+    // Функция для скачивания JSON
+    function downloadJson(data) {
+        const json = JSON.stringify(data);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'data.json';
+        link.click();
+        URL.revokeObjectURL(url);
+    }
 
-// Функция для отображения данных
-function displayFormData(data) {
-    const table = document.createElement('table');
-    const headers = ['ФИО', 'Email', 'Телефон', 'JSON', 'Удалить'];
-    const headerRow = table.insertRow();
-    headers.forEach(header => {
-        const th = document.createElement('th');
-        th.textContent = header;
-        headerRow.appendChild(th);
-    });
-
-    data.forEach(item => {
-        const row = table.insertRow();
-        const fullNameCell = row.insertCell();
-        fullNameCell.textContent = item.full_name;
-        const emailCell = row.insertCell();
-        emailCell.textContent = item.email;
-        const phoneCell = row.insertCell();
-        phoneCell.textContent = item.phone;
-        const jsonCell = row.insertCell();
-        const downloadButton = document.createElement('button');
-        downloadButton.textContent = 'Скачать JSON';
-        downloadButton.addEventListener('click', () => downloadJson(item));
-        jsonCell.appendChild(downloadButton);
-        const deleteCell = row.insertCell();
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Удалить';
-        deleteButton.addEventListener('click', () => deleteFormData(item.full_name));
-        deleteCell.appendChild(deleteButton);
-    });
-
-    document.getElementById('form-data').innerHTML = '';
-    document.getElementById('form-data').appendChild(table);
-}
-
-// Функция для фильтрации данных
-function filterFormData(filter) {
-    fetch('/get_form_data')
-        .then(response => response.json())
-        .then(data => {
-            originalData = data; // Сохраняем исходные данные
-            const filteredData = data.filter(item => item.full_name.toLowerCase().includes(filter.toLowerCase()));
-            displayFormData(filteredData);
-        })
-        .catch(error => {
-            console.error('Ошибка при получении данных:', error);
-            // Отображение ошибки пользователю
-            alert('Произошла ошибка при получении данных. Пожалуйста, попробуйте еще раз.');
+    // Функция для отображения данных
+    function displayFormData(data) {
+        const table = document.createElement('table');
+        const headers = ['ФИО', 'Email', 'Телефон', 'Дата рождения', 'JSON', 'Удалить'];
+        const headerRow = table.insertRow();
+        headers.forEach(header => {
+            const th = document.createElement('th');
+            th.textContent = header;
+            headerRow.appendChild(th);
         });
-}
 
-// Обработка отправки формы фильтрации
-document.getElementById('filterForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const filter = document.getElementById('filterInput').value;
-    filterFormData(filter);
-});
+        data.forEach(item => {
+            const row = table.insertRow();
+            const fullNameCell = row.insertCell();
+            fullNameCell.textContent = item.full_name;
+            const emailCell = row.insertCell();
+            emailCell.textContent = item.email;
+            const phoneCell = row.insertCell();
+            phoneCell.textContent = item.phone;
+            const dateOfBirthCell = row.insertCell();
+            dateOfBirthCell.textContent = item.date_of_birth; // Предполагается, что дата рождения уже в нужном формате
+            const jsonCell = row.insertCell();
+            const downloadButton = document.createElement('button');
+            downloadButton.textContent = 'Скачать JSON';
+            downloadButton.addEventListener('click', () => downloadJson(item));
+            jsonCell.appendChild(downloadButton);
+            const deleteCell = row.insertCell();
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Удалить';
+            deleteButton.addEventListener('click', () => deleteFormData(item.full_name));
+            deleteCell.appendChild(deleteButton);
+        });
+
+        document.getElementById('form-data').innerHTML = '';
+        document.getElementById('form-data').appendChild(table);
+    }
+
+    // Функция для фильтрации данных
+    function filterFormData(filter, sortOrder) {
+        fetch('/get_form_data')
+            .then(response => response.json())
+            .then(data => {
+                originalData = data; // Сохраняем исходные данные
+                const filteredData = data
+                    .filter(item => item.full_name.toLowerCase().includes(filter.toLowerCase()))
+                    .sort((a, b) => {
+                        if (sortOrder === 'asc') {
+                            return new Date(a.date_of_birth) - new Date(b.date_of_birth);
+                        } else {
+                            return new Date(b.date_of_birth) - new Date(a.date_of_birth);
+                        }
+                    });
+                displayFormData(filteredData);
+            })
+            .catch(error => {
+                console.error('Ошибка при получении данных:', error);
+                alert('Произошла ошибка при получении данных. Пожалуйста, попробуйте еще раз.');
+            });
+    }
+
+    // Обработка отправки формы фильтрации
+    document.getElementById('filterForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const filter = document.getElementById('filterInput').value;
+        filterFormData(filter, 'asc'); // По умолчанию сортировка по возрастанию
+    });
+
+// Обработка клика по кнопке "По возрастанию"
+document.getElementById('sortAscButton').addEventListener('click', function() {
+            const filter = document.getElementById('filterInput').value;
+            filterFormData(filter, 'asc');
+        });
+
+        // Обработка клика по кнопке "По убыванию"
+        document.getElementById('sortDescButton').addEventListener('click', function() {
+            const filter = document.getElementById('filterInput').value;
+            filterFormData(filter, 'desc');
+        });
 
 // Обработка клика по кнопке "Сброс"
 document.getElementById('resetButton').addEventListener('click', function() {
