@@ -60,6 +60,23 @@ app.post('/login', (req, res) => {
     }
 });
 
+// Обработка POST запроса для удаления анкеты
+app.post('/delete_form_data', (req, res) => {
+    console.log('Получен POST-запрос на /delete_form_data');
+    console.log('Тело запроса:', req.body);
+
+    // Получаем данные из тела запроса
+    const fullName = req.body.full_name;
+
+    // Удаляем анкету из хранилища
+    formDataStorage = formDataStorage.filter(item => item.full_name !== fullName);
+    console.log('Данные после удаления:', formDataStorage);
+
+    // Отправляем ответ клиенту
+    res.send('Анкета успешно удалена!');
+});
+
+
 // Запуск сервера
 app.listen(port, () => {
     console.log(`Сервер запущен на порту ${port}`);

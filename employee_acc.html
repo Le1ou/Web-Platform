@@ -94,106 +94,68 @@
 </div>
 </div> 
 <script>
-    // Функция для обновления данных на странице
-    function updateFormData() {
-        fetch('/get_form_data')
-            .then(response => response.json())
-            .then(data => {
-                // Очищаем текущие данные
-                document.getElementById('form-data').innerHTML = '';
+let originalData = []; // Переменная для хранения исходных данных
 
-                // Создаем таблицу для отображения данных
-                const table = document.createElement('table');
+// Функция для скачивания JSON
+function downloadJson(data) {
+    const json = JSON.stringify(data);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'data.json';
+    link.click();
+    URL.revokeObjectURL(url);
+}
 
-                // Добавляем заголовки таблицы
-                const headers = ['ФИО', 'Email', 'Телефон', 'JSON'];
-                const headerRow = table.insertRow();
-                headers.forEach(header => {
-                    const th = document.createElement('th');
-                    th.textContent = header;
-                    headerRow.appendChild(th);
-                });
+// Функция для отображения данных
+function displayFormData(data) {
+    const table = document.createElement('table');
+    const headers = ['ФИО', 'Email', 'Телефон', 'JSON', 'Удалить'];
+    const headerRow = table.insertRow();
+    headers.forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header;
+        headerRow.appendChild(th);
+    });
 
-                // Добавляем строки с данными
-                data.forEach(item => {
-                    const row = table.insertRow();
-                    const fullNameCell = row.insertCell();
-                    fullNameCell.textContent = item.full_name;
-                    const emailCell = row.insertCell();
-                    emailCell.textContent = item.email;
-                    const phoneCell = row.insertCell();
-                    phoneCell.textContent = item.phone;
-                    const jsonCell = row.insertCell();
-                    const downloadButton = document.createElement('button');
-                    downloadButton.textContent = 'Скачать JSON';
-                    downloadButton.addEventListener('click', () => downloadJson(item));
-                    jsonCell.appendChild(downloadButton);
-                });
+    data.forEach(item => {
+        const row = table.insertRow();
+        const fullNameCell = row.insertCell();
+        fullNameCell.textContent = item.full_name;
+        const emailCell = row.insertCell();
+        emailCell.textContent = item.email;
+        const phoneCell = row.insertCell();
+        phoneCell.textContent = item.phone;
+        const jsonCell = row.insertCell();
+        const downloadButton = document.createElement('button');
+        downloadButton.textContent = 'Скачать JSON';
+        downloadButton.addEventListener('click', () => downloadJson(item));
+        jsonCell.appendChild(downloadButton);
+        const deleteCell = row.insertCell();
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Удалить';
+        deleteButton.addEventListener('click', () => deleteFormData(item.full_name));
+        deleteCell.appendChild(deleteButton);
+    });
 
-                // Отображаем таблицу
-                document.getElementById('form-data').appendChild(table);
-            })
-            .catch(error => {
-                console.error('Ошибка при получении данных:', error);
-            });
-    }
+    document.getElementById('form-data').innerHTML = '';
+    document.getElementById('form-data').appendChild(table);
+}
 
-    // Функция для скачивания JSON
-    function downloadJson(data) {
-        const json = JSON.stringify(data);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'data.json';
-        link.click();
-        URL.revokeObjectURL(url);
-    }
-
-        // Функция для фильтрации данных
+// Функция для фильтрации данных
 function filterFormData(filter) {
     fetch('/get_form_data')
         .then(response => response.json())
         .then(data => {
-            // Очищаем текущие данные
-            document.getElementById('form-data').innerHTML = '';
-
-            // Фильтруем данные
+            originalData = data; // Сохраняем исходные данные
             const filteredData = data.filter(item => item.full_name.toLowerCase().includes(filter.toLowerCase()));
-
-            // Создаем таблицу для отображения данных
-            const table = document.createElement('table');
-
-            // Добавляем заголовки таблицы
-            const headers = ['ФИО', 'Email', 'Телефон', 'JSON'];
-            const headerRow = table.insertRow();
-            headers.forEach(header => {
-                const th = document.createElement('th');
-                th.textContent = header;
-                headerRow.appendChild(th);
-            });
-
-            // Добавляем строки с данными
-            filteredData.forEach(item => {
-                const row = table.insertRow();
-                const fullNameCell = row.insertCell();
-                fullNameCell.textContent = item.full_name;
-                const emailCell = row.insertCell();
-                emailCell.textContent = item.email;
-                const phoneCell = row.insertCell();
-                phoneCell.textContent = item.phone;
-                const jsonCell = row.insertCell();
-                const downloadButton = document.createElement('button');
-                downloadButton.textContent = 'Скачать JSON';
-                downloadButton.addEventListener('click', () => downloadJson(item));
-                jsonCell.appendChild(downloadButton);
-            });
-
-            // Отображаем таблицу
-            document.getElementById('form-data').appendChild(table);
+            displayFormData(filteredData);
         })
         .catch(error => {
             console.error('Ошибка при получении данных:', error);
+            // Отображение ошибки пользователю
+            alert('Произошла ошибка при получении данных. Пожалуйста, попробуйте еще раз.');
         });
 }
 
@@ -207,52 +169,53 @@ document.getElementById('filterForm').addEventListener('submit', function(event)
 // Обработка клика по кнопке "Сброс"
 document.getElementById('resetButton').addEventListener('click', function() {
     document.getElementById('filterInput').value = '';
-    updateFormData();
+    displayFormData(originalData); // Восстанавливаем исходные данные
 });
+
+// Функция для удаления анкеты
+function deleteFormData(fullName) {
+    if (confirm(`Вы уверены, что хотите удалить анкету ${fullName}?`)) {
+        fetch('/delete_form_data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ full_name: fullName })
+        })
+        .then(response => {
+            if (response.ok) {
+                updateFormData();
+            } else {
+                console.error('Ошибка при удалении анкеты:', response.statusText);
+                // Отображение ошибки пользователю
+                alert('Произошла ошибка при удалении анкеты. Пожалуйста, попробуйте еще раз.');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка при отправке запроса на удаление анкеты:', error);
+            // Отображение ошибки пользователю
+            alert('Произошла ошибка при отправке запроса на удаление анкеты. Пожалуйста, попробуйте еще раз.');
+        });
+    }
+}
 
 // Функция для обновления данных на странице
 function updateFormData() {
     fetch('/get_form_data')
         .then(response => response.json())
         .then(data => {
-            // Очищаем текущие данные
-            document.getElementById('form-data').innerHTML = '';
-
-            // Создаем таблицу для отображения данных
-            const table = document.createElement('table');
-
-            // Добавляем заголовки таблицы
-            const headers = ['ФИО', 'Email', 'Телефон', 'JSON'];
-            const headerRow = table.insertRow();
-            headers.forEach(header => {
-                const th = document.createElement('th');
-                th.textContent = header;
-                headerRow.appendChild(th);
-            });
-
-            // Добавляем строки с данными
-            data.forEach(item => {
-                const row = table.insertRow();
-                const fullNameCell = row.insertCell();
-                fullNameCell.textContent = item.full_name;
-                const emailCell = row.insertCell();
-                emailCell.textContent = item.email;
-                const phoneCell = row.insertCell();
-                phoneCell.textContent = item.phone;
-                const jsonCell = row.insertCell();
-                const downloadButton = document.createElement('button');
-                downloadButton.textContent = 'Скачать JSON';
-                downloadButton.addEventListener('click', () => downloadJson(item));
-                jsonCell.appendChild(downloadButton);
-            });
-
-            // Отображаем таблицу
-            document.getElementById('form-data').appendChild(table);
+            originalData = data; // Сохраняем исходные данные
+            displayFormData(data);
         })
         .catch(error => {
             console.error('Ошибка при получении данных:', error);
+            // Отображение ошибки пользователю
+            alert('Произошла ошибка при получении данных. Пожалуйста, попробуйте еще раз.');
         });
 }
+
+// Вызываем функцию для обновления данных при загрузке страницы
+updateFormData();
 </script>
 </body>
 </html>
