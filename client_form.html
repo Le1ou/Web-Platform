@@ -77,11 +77,6 @@
                         <label for="graduation_year" class="required-label">Год окончания:</label>
                         <input type="number" id="graduation_year" name="graduation_year">
                     </div>
-                    
-                    <div class="form-element">
-                        <label for="education_certificate">Наличие диплома/сертификата:</label>
-                        <input type="checkbox" id="education_certificate" name="education_certificate">
-                    </div>
                 </fieldset>
             </div>
 
@@ -133,10 +128,6 @@
             <div class="form-section security">
                 <fieldset>
                     <legend>Секретность и опыт в ОПК:</legend>
-                    <div class="form-element">
-                        <label for="security_clearance" class="required-label">Готовность к соблюдению требований по секретности и конфиденциальности:</label>
-                        <input type="checkbox" id="security_clearance" name="security_clearance" value="yes">
-                    </div>
                     
                     <div class="form-element">
                         <label for="previous_opk_experience" class="required-label">Опыт работы в ОПК:</label>
@@ -148,22 +139,21 @@
             <button type="submit" class="submit-button">Отправить</button> 
         </form>
     </div>
-
     <script>
         const form = document.getElementById('form');
-        // Обработка отправки формы через AJAX
 
+        // Обработка отправки формы через AJAX
         form.addEventListener('submit', function(event) {
             console.log(event.targetaformData);
             console.log('Форма отправлена');
-            event.preventDefault(); // Отменяем стандартное поведение отправки формы
+            event.preventDefault();
 
             const formData = {}
             Array.prototype.forEach.call(form.elements, element => {
                 formData[element.name] = element.value
             })
-            
             console.log(formData);
+            
             // Выполняем AJAX запрос на сервер
             fetch('/submit_form', {
                 method: 'POST',
@@ -176,18 +166,14 @@
                 console.log('Ответ от сервера получен');
                 if (response.ok) {
                     console.log('Успешный ответ от сервера');
-                    // Если запрос успешен, выводим сообщение об успешной отправке анкеты
                     alert('Анкета успешно отправлена!');
-                    // Очищаем поля формы после успешной отправки (это можно изменить или опустить)
                     document.getElementById('form').reset();
                 } else {
                     console.log('Ошибка ответа от сервера');
-                    // Если возникла ошибка, выводим сообщение об ошибке
                     alert('Произошла ошибка при отправке анкеты.');
                 }
             })
             .catch(error => {
-                // Обработка ошибок сети
                 console.error('Ошибка:', error);
                 alert('Произошла ошибка при отправке анкеты. Пожалуйста, попробуйте еще раз.');
             });

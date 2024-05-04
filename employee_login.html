@@ -27,14 +27,14 @@
             function validateForm() {
                 var username = document.getElementById('username').value;
                 var password = document.getElementById('password').value;
-                
-                // Проверка правильности логина и пароля (здесь может быть ваша логика)
-                if (username === '1' && password === '1') {
-                    window.location.href = '/employee_acc.html'; // Перенаправление на страницу сотрудника
-                    return false; // Остановка отправки формы
+
+                // Проверка правильности логина и пароля
+                if (username === 'Klyuev777' && password === '9Eo94kg9dl') {
+                    window.location.href = '/employee_acc.html';
+                    return false;
                 } else {
-                    document.getElementById('errorMessage').style.display = 'block'; // Показать сообщение об ошибке
-                    return false; // Остановка отправки формы
+                    document.getElementById('errorMessage').style.display = 'block';
+                    return false;
                 }
             }
         </script>

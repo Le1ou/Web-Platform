@@ -87,8 +87,8 @@
         <div class="filter-form">
             <form id="filterForm">
                 <input type="text" id="filterInput" placeholder="Фильтр по ФИО">
-                <button type="button" id="sortAscButton">По возрастанию</button>
-                <button type="button" id="sortDescButton">По убыванию</button>
+                <button type="button" id="sortAscButton">Дата рождения по возрастанию</button>
+                <button type="button" id="sortDescButton">Дата рождения по убыванию</button>
                 <button type="submit">Поиск</button>
                 <button type="button" id="resetButton">Сброс</button>
             </form>
@@ -115,31 +115,31 @@
         const headers = ['ФИО', 'Email', 'Телефон', 'Дата рождения', 'JSON', 'Удалить'];
         const headerRow = table.insertRow();
         headers.forEach(header => {
-            const th = document.createElement('th');
-            th.textContent = header;
-            headerRow.appendChild(th);
+        const th = document.createElement('th');
+        th.textContent = header;
+        headerRow.appendChild(th);
         });
 
         data.forEach(item => {
-            const row = table.insertRow();
-            const fullNameCell = row.insertCell();
-            fullNameCell.textContent = item.full_name;
-            const emailCell = row.insertCell();
-            emailCell.textContent = item.email;
-            const phoneCell = row.insertCell();
-            phoneCell.textContent = item.phone;
-            const dateOfBirthCell = row.insertCell();
-            dateOfBirthCell.textContent = item.date_of_birth; // Предполагается, что дата рождения уже в нужном формате
-            const jsonCell = row.insertCell();
-            const downloadButton = document.createElement('button');
-            downloadButton.textContent = 'Скачать JSON';
-            downloadButton.addEventListener('click', () => downloadJson(item));
-            jsonCell.appendChild(downloadButton);
-            const deleteCell = row.insertCell();
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Удалить';
-            deleteButton.addEventListener('click', () => deleteFormData(item.full_name));
-            deleteCell.appendChild(deleteButton);
+        const row = table.insertRow();
+        const fullNameCell = row.insertCell();
+        fullNameCell.textContent = item.full_name;
+        const emailCell = row.insertCell();
+        emailCell.textContent = item.email;
+        const phoneCell = row.insertCell();
+        phoneCell.textContent = item.phone;
+        const dateOfBirthCell = row.insertCell();
+        dateOfBirthCell.textContent = item.date_of_birth;
+        const jsonCell = row.insertCell();
+        const downloadButton = document.createElement('button');
+        downloadButton.textContent = 'Скачать JSON';
+        downloadButton.addEventListener('click', () => downloadJson(item));
+        jsonCell.appendChild(downloadButton);
+        const deleteCell = row.insertCell();
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Удалить';
+        deleteButton.addEventListener('click', () => deleteFormData(item.full_name));
+        deleteCell.appendChild(deleteButton);
         });
 
         document.getElementById('form-data').innerHTML = '';
@@ -149,95 +149,92 @@
     // Функция для фильтрации данных
     function filterFormData(filter, sortOrder) {
         fetch('/get_form_data')
-            .then(response => response.json())
-            .then(data => {
-                originalData = data; // Сохраняем исходные данные
-                const filteredData = data
-                    .filter(item => item.full_name.toLowerCase().includes(filter.toLowerCase()))
-                    .sort((a, b) => {
-                        if (sortOrder === 'asc') {
-                            return new Date(a.date_of_birth) - new Date(b.date_of_birth);
-                        } else {
-                            return new Date(b.date_of_birth) - new Date(a.date_of_birth);
-                        }
-                    });
-                displayFormData(filteredData);
-            })
-            .catch(error => {
-                console.error('Ошибка при получении данных:', error);
-                alert('Произошла ошибка при получении данных. Пожалуйста, попробуйте еще раз.');
+        .then(response => response.json())
+        .then(data => {
+            originalData = data;
+            const filteredData = data
+            .filter(item => item.full_name.toLowerCase().includes(filter.toLowerCase()))
+            .sort((a, b) => {
+                if (sortOrder === 'asc') {
+                    return new Date(a.date_of_birth) - new Date(b.date_of_birth);
+                } else {
+                    return new Date(b.date_of_birth) - new Date(a.date_of_birth);
+                }
             });
+                displayFormData(filteredData);
+        })
+        .catch(error => {
+            onsole.error('Ошибка при получении данных:', error);
+            alert('Произошла ошибка при получении данных. Пожалуйста, попробуйте еще раз.');
+        });
     }
 
     // Обработка отправки формы фильтрации
     document.getElementById('filterForm').addEventListener('submit', function(event) {
         event.preventDefault();
         const filter = document.getElementById('filterInput').value;
-        filterFormData(filter, 'asc'); // По умолчанию сортировка по возрастанию
+        filterFormData(filter, 'asc');
     });
 
-// Обработка клика по кнопке "По возрастанию"
-document.getElementById('sortAscButton').addEventListener('click', function() {
-            const filter = document.getElementById('filterInput').value;
-            filterFormData(filter, 'asc');
-        });
+    // Обработка клика по кнопке "По возрастанию"
+    document.getElementById('sortAscButton').addEventListener('click', function() {
+        const filter = document.getElementById('filterInput').value;
+        filterFormData(filter, 'asc');
+    });
 
-        // Обработка клика по кнопке "По убыванию"
-        document.getElementById('sortDescButton').addEventListener('click', function() {
-            const filter = document.getElementById('filterInput').value;
-            filterFormData(filter, 'desc');
-        });
+    // Обработка клика по кнопке "По убыванию"
+    document.getElementById('sortDescButton').addEventListener('click', function() {
+        const filter = document.getElementById('filterInput').value;
+        filterFormData(filter, 'desc');
+    });
 
-// Обработка клика по кнопке "Сброс"
-document.getElementById('resetButton').addEventListener('click', function() {
-    document.getElementById('filterInput').value = '';
-    displayFormData(originalData); // Восстанавливаем исходные данные
-});
+    // Обработка клика по кнопке "Сброс"
+    document.getElementById('resetButton').addEventListener('click', function() {
+        document.getElementById('filterInput').value = '';
+        displayFormData(originalData);
+    });
 
-// Функция для удаления анкеты
-function deleteFormData(fullName) {
-    if (confirm(`Вы уверены, что хотите удалить анкету ${fullName}?`)) {
-        fetch('/delete_form_data', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ full_name: fullName })
-        })
-        .then(response => {
-            if (response.ok) {
-                updateFormData();
-            } else {
-                console.error('Ошибка при удалении анкеты:', response.statusText);
-                // Отображение ошибки пользователю
-                alert('Произошла ошибка при удалении анкеты. Пожалуйста, попробуйте еще раз.');
-            }
-        })
-        .catch(error => {
-            console.error('Ошибка при отправке запроса на удаление анкеты:', error);
-            // Отображение ошибки пользователю
-            alert('Произошла ошибка при отправке запроса на удаление анкеты. Пожалуйста, попробуйте еще раз.');
-        });
+    // Функция для удаления анкеты
+    function deleteFormData(fullName) {
+        if (confirm(`Вы уверены, что хотите удалить анкету ${fullName}?`)) {
+            fetch('/delete_form_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ full_name: fullName })
+            })
+            .then(response => {
+                if (response.ok) {
+                    updateFormData();
+                } else {
+                    console.error('Ошибка при удалении анкеты:', response.statusText);
+                    alert('Произошла ошибка при удалении анкеты. Пожалуйста, попробуйте еще раз.');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при отправке запроса на удаление анкеты:', error);
+                alert('Произошла ошибка при отправке запроса на удаление анкеты. Пожалуйста, попробуйте еще раз.');
+            });
+        }
     }
-}
 
-// Функция для обновления данных на странице
-function updateFormData() {
-    fetch('/get_form_data')
+    // Функция для обновления данных на странице
+    function updateFormData() {
+        fetch('/get_form_data')
         .then(response => response.json())
         .then(data => {
-            originalData = data; // Сохраняем исходные данные
+            originalData = data;
             displayFormData(data);
         })
         .catch(error => {
             console.error('Ошибка при получении данных:', error);
-            // Отображение ошибки пользователю
             alert('Произошла ошибка при получении данных. Пожалуйста, попробуйте еще раз.');
         });
-}
+    }
 
-// Вызываем функцию для обновления данных при загрузке страницы
-updateFormData();
+    // Вызываем функцию для обновления данных при загрузке страницы
+    updateFormData();
 </script>
 </body>
 </html>
